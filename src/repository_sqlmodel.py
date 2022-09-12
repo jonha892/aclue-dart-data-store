@@ -31,13 +31,10 @@ def add_throw(engine, throw: Throw):
 
 def update_throw_label(engine: engine, throw_id: str, series_id: str, label_request: LabelRequest):
     with Session(engine) as session:
-        # statement = select(Throw).where(Throw.throw_id == throw_id and Throw.series_id == series_id)
-        # results = session.exec(statement)
-        # existing_throw = results.one_or_none()
         existing_throw = session.get(Throw, (throw_id, series_id))
-
         if existing_throw is None:
             return False
+            
         print(f"Found existing throw: {existing_throw}" )
         log.debug(f"Found existing throw: {existing_throw}")
         #logger.debug(f"Found existing throw: {existing_throw.__repr__}", feature="f-strings" )

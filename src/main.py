@@ -62,7 +62,7 @@ async def get_label(throw_id: str, series_id: int):
         raise HTTPException(404, "Throw not found")
     if throw.label is None or len(throw.label) == 0:
         raise HTTPException(404, "Label not set")
-    print("label str", throw.label)
+    logger.debug("label str", throw.label)
     label = json.loads(throw.label)
     return label
 
