@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "8091d6d2-c99a-46f9-9f21-300a8c441f9d",
+		"_postman_id": "ecdff798-5c5d-4f8d-806d-4f915d215494",
 		"name": "DartNet",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -13,8 +13,17 @@
 					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"example-1\",\r\n    \"creationDate\": \"2020-07-10 15:00:00.000\",\r\n    \"throws\": [\r\n        {\r\n            \"id\": 0,\r\n            \"scoreString\": \"d11\",\r\n            \"imageResolution\": {\r\n                \"x\": 1,\r\n                \"y\": 1\r\n            },\r\n            \"imageLabel\": {\r\n                \"planeCoordinates\": [ {\"x\": 1, \"y\":2}],\r\n                \"dartCoordinates\": [{\"x\": 1, \"y\":2}]\r\n            },\r\n            \"imageString\": \"iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAMUlEQVR4nGJpkPBgwAby09qxijNhFcUDRjUQAxhP8/3AKiHL94U6NoxqIAYAAgAA//9M2QVOgFtVRgAAAABJRU5ErkJggg==\"\r\n        },\r\n        {\r\n            \"id\": 1,\r\n            \"scoreString\": \"20\",\r\n            \"imageResolution\": {\r\n                \"x\": 2,\r\n                \"y\": 2\r\n            },\r\n            \"imageLabel\": {\r\n                \"planeCoordinates\": [{\"x\": 1, \"y\":2}],\r\n                \"dartCoordinates\": [{\"x\": 1, \"y\":2}]\r\n            },\r\n            \"imageString\": \"iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAMUlEQVR4nGJpkPBgwAby09qxijNhFcUDRjUQAxhP8/3AKiHL94U6NoxqIAYAAgAA//9M2QVOgFtVRgAAAABJRU5ErkJggg==\"\r\n        },\r\n        {\r\n            \"id\": 2,\r\n            \"scoreString\": \"1\",\r\n            \"imageResolution\": {\r\n                \"x\": 3,\r\n                \"y\": 3\r\n            },\r\n            \"imageLabel\": {\r\n                \"planeCoordinates\": [{\"x\": 1, \"y\":2}],\r\n                \"dartCoordinates\": [{\"x\": 1, \"y\":2}]\r\n            },\r\n            \"imageString\": \"iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAMUlEQVR4nGJpkPBgwAby09qxijNhFcUDRjUQAxhP8/3AKiHL94U6NoxqIAYAAgAA//9M2QVOgFtVRgAAAABJRU5ErkJggg==\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "0.0.0.0:6666/api/throw-sequences/test-id",
+							"raw": "0.0.0.0:6666/api/throw-sequences/example-1",
 							"host": [
 								"0",
 								"0",
@@ -25,7 +34,7 @@
 							"path": [
 								"api",
 								"throw-sequences",
-								"test-id"
+								"example-1"
 							]
 						}
 					},
@@ -59,7 +68,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "0.0.0.0:6666/api/throw-sequences/test-id",
+							"raw": "0.0.0.0:6666/api/throw-sequences/example-1",
 							"host": [
 								"0",
 								"0",
@@ -70,7 +79,7 @@
 							"path": [
 								"api",
 								"throw-sequences",
-								"test-id"
+								"example-1"
 							]
 						}
 					},
@@ -81,8 +90,17 @@
 					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"throw_1_label\": {\r\n        \"planeCoordinates\": [ {\"x\": -1, \"y\":-1}],\r\n        \"dartCoordinates\": [{\"x\": -1, \"y\": -1}]\r\n    },\r\n    \"throw_2_label\": {\r\n        \"planeCoordinates\": [ {\"x\": -1, \"y\":-1}],\r\n        \"dartCoordinates\": [{\"x\": -1, \"y\": -1}]\r\n    },\r\n    \"throw_3_label\": {\r\n        \"planeCoordinates\": [ {\"x\": -1, \"y\":-1}],\r\n        \"dartCoordinates\": [{\"x\": -1, \"y\": -1}]\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "0.0.0.0:6666/api/labels/test-id",
+							"raw": "0.0.0.0:6666/api/labels/example-1",
 							"host": [
 								"0",
 								"0",
@@ -93,7 +111,7 @@
 							"path": [
 								"api",
 								"labels",
-								"test-id"
+								"example-1"
 							]
 						}
 					},
@@ -105,7 +123,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "0.0.0.0:6666/api/throw-sequences/test-id",
+							"raw": "0.0.0.0:6666/api/throw-sequences/example-1",
 							"host": [
 								"0",
 								"0",
@@ -116,7 +134,29 @@
 							"path": [
 								"api",
 								"throw-sequences",
-								"test-id"
+								"example-1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Ids",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "0.0.0.0:6666/api/ids",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "6666",
+							"path": [
+								"api",
+								"ids"
 							]
 						}
 					},
@@ -131,7 +171,10 @@
 					"name": "New Image",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": ""
+						}
 					},
 					"response": []
 				},

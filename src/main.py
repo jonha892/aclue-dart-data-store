@@ -1,19 +1,20 @@
 import json
-from pprint import pprint
 import base64
 import os
 import logging
+from pathlib import Path
+import shutil
 
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
-from models import ThrowSequence, ThrowSequenceRequestModel
 
-import repository_sqlmodel as repo
+from models import ThrowSequenceLabelsRequestModel, ThrowSequenceRequestModel
+import repository_dbm as repo
 
 logger = logging.getLogger("api")
-DATA_PATH = "../data"
-engine = repo.get_engine()
+DATA_PATH = Path() / '..' / 'data'
+
+repo.start()
 
 app = FastAPI(debug=True)
 
@@ -36,113 +37,91 @@ async def startup_event():
     handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
     logger.addHandler(handler)
 
+@app.on_event("shutdown")
+def shutdown_event():
+    repo.shutdown()
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
 
 
 @app.post("/api/throw-sequences/{throwSequenceId}")
-async def postNewThrowSequence(request: ThrowSequenceRequestModel):
-    throw_sequence_path = os.path.join(DATA_PATH, request.id)
+async def postNewThrowSequence(request: ThrowSequenceRequestModel, throwSequenceId: str):
+    throw_sequence_path = DATA_PATH / throwSequenceId
     # create missing directories
     os.makedirs(throw_sequence_path, exist_ok=True)
     
     for throw in request.throws:
-        throw_path = os.path.join(throw_sequence_path, str(throw.id) + '.png')
-        with open(throw_path, 'wb') as f:
+        throw_path = throw_sequence_path / (str(throw.id) + '.png')
+        with open(throw_path.as_posix(), 'wb') as f:
             f.write(base64.urlsafe_b64decode(throw.imageString))
 
-    throw_sequence_entity = ThrowSequence.from_request(request)
-    repo.add_throw_sequence(engine, throw_sequence_entity)
+    repo.add_throw_sequence(request)
 
     return {}
 
+@app.get("/api/throw-sequences/{throwSequenceId}")
+async def getThrowSequence(throwSequenceId: str):
+    throw_sequcnce = repo.get(throwSequenceId)
+
+    print(throw_sequcnce)
+    if not throw_sequcnce:
+        raise HTTPException(status_code=404, detail="ThrowSequence not found") 
+    
+    throw_sequence = json.loads(throw_sequcnce)
+    throws_with_image = []
+    for throw in throw_sequence['throws']:
+        throw_image_path = DATA_PATH / throwSequenceId / (str(throw['id']) + '.png')
+        with open(throw_image_path, 'rb') as f:
+            base_64_image = base64.b64encode(f.read())
+            throws_with_image.append({**throw, 'imageString': base_64_image})
+    throw_sequence['throws'] = throws_with_image
+    return throw_sequence
+
 @app.delete("/api/throw-sequences/{throwSequenceId}")
-async def deleteThrowSequence(throwSequenceId):
-    deleted = repo.delete_throw_sequence(engine, throwSequenceId)
-    return { "deleted": deleted}
+async def deleteThrowSequence(throwSequenceId: str):
+    
+    db_deleted = repo.delete_throw_sequence(throwSequenceId)
+
+    throw_sequence_path = DATA_PATH / throwSequenceId
+    file_deleted = False
+    
+    if throw_sequence_path.is_dir():
+        file_deleted = True
+        shutil.rmtree(throw_sequence_path)
+
+    return { "db_deleted": db_deleted, "file_deleted": file_deleted }
 
 
 @app.get("/api/labels")
-async def getLalbelOverview():
-    all_throw_sequences = repo.get_all(engine)
+async def getLabelOverview():
+    throw_sequences = [json.loads(t) for t in repo.get_all()]
+    label_overview = [ {'throwSequenceId': t['id'], 'creationDate': t['creationDate'], 'isFullyLabeled': is_fully_labeled(t)} for t in throw_sequences]
 
-    res = []
-    for sequence in all_throw_sequences:
-        throws = list(map(lambda x: json.loads(x), sequence.throws))
+    return label_overview
 
-        is_fully_labeled = all(map(lambda t: \
-            len(t['imageLabel']['planeCoordinates']) > 0 and \
-            len(t['imageLabel']['dartCoordinates']) > 0
-            , throws))
-        
-        res.append({
-            'throwSequenceId': sequence.id,
-            'creationDate': sequence.creationDate,
-            'isFullyLabeled': is_fully_labeled,
-        })
+@app.post("/api/labels/{throwSequenceId}") 
+async def postThrowSequenceLabels(thowSequenceLabels: ThrowSequenceLabelsRequestModel, throwSequenceId: str):
+    if not repo.throw_sequence_exists(throwSequenceId):
+        raise HTTPException(status_code=404, detail="ThrowSequence not found") 
 
-    return res
+    repo.update_label(throwSequenceId, thowSequenceLabels)
+    return {}
 
 @app.get("/test")
 async def test():
-    r = repo.get_all(engine)
+    r = repo.get_all()
     return r
 
-"""
-@app.post("/throws")
-async def throw(throw_request: ThrowRequest):
-    throw_path = os.path.join(DATA_PATH, throw_request.throw_id)
-    save_path = os.path.join(throw_path, f"{throw_request.series_id}.png")
+@app.get("/api/ids")
+async def getIds():
+    r = repo.get_ids()
+    return r
 
-    # create missing directories
-    os.makedirs(throw_path, exist_ok=True)
 
-    with open(save_path, 'wb') as f:
-        f.write(base64.urlsafe_b64decode(throw_request.img_str))
-
-    throw_entity = Throw.from_request(throw_request)
-    db.add_throw(engine, throw_entity)
-
-    return {"message": "success"}
-
-@app.get("/throws/{throw_id}/{series_id}/img")
-async def get_throw_img(throw_id: str, series_id: int):
-
-    #Loads an image as bytes.
-
-    image_path = os.path.join(DATA_PATH, throw_id, f"{series_id}.png")
-
-    try:
-        with open(image_path, 'rb') as f:
-            image_bytes = f.read()
-            headers = { 'Access-Control-Allow-Origin': '*' }
-            return Response(content=image_bytes, media_type="image/png", headers=headers)
-    except FileNotFoundError:
-        raise HTTPException(404, "Image not found")
-
-@app.get("/throws/list")
-async def get_throw_ids():
-    return db.get_throw_ids(engine)
-
-@app.get("/labels/{throw_id}/{series_id}")
-async def get_label(throw_id: str, series_id: int):
-    throw = db.get_throw(engine, throw_id, series_id)
-
-    if throw is None:
-        raise HTTPException(404, "Throw not found")
-    if throw.label is None or len(throw.label) == 0:
-        raise HTTPException(404, "Label not set")
-    logger.debug("label str", throw.label)
-    label = json.loads(throw.label)
-    return label
-
-@app.get("/labels")
-async def get_all_labels():
-    pass
-
-@app.put("/labels/{throw_id}/{series_id}")
-async def update_label(throw_id: str, series_id: int, label: LabelRequest):
-    db.update_throw_label(engine, throw_id, series_id, label)
-    return {"message": "success"}
-"""
+def is_fully_labeled(throw_sequence_dict):
+    return all(map(lambda t: \
+            len(t['imageLabel']['planeCoordinates']) > 0 and \
+            len(t['imageLabel']['dartCoordinates']) > 0
+            , throw_sequence_dict["throws"]))
