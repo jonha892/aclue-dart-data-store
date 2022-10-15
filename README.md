@@ -1,6 +1,8 @@
 # aclue-dart-data-store
 
-uvicorn main:app --reload --host=0.0.0.0
+## Start
+cd src
+uvicorn main:app --reload --host=0.0.0.0 --port=6666
 
 
 example request bodies:
