@@ -121,7 +121,7 @@ async def getIds():
 
 
 def is_fully_labeled(throw_sequence_dict):
-    return all(map(lambda t: \
-            len(t['imageLabel']['planeCoordinates']) > 0 and \
-            len(t['imageLabel']['dartCoordinates']) > 0
+    return all(map(lambda throw: \
+            len(throw['imageLabel']['planeCoordinates']) > 0 and \
+            len(throw['imageLabel']['dartCoordinates']) > 0
             , throw_sequence_dict["throws"]))
