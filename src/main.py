@@ -6,6 +6,7 @@ from pathlib import Path
 import shutil
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
 
 from models import ThrowSequenceLabelsRequestModel, ThrowSequenceRequestModel
@@ -16,19 +17,36 @@ DATA_PATH = Path() / '..' / 'data'
 
 repo.start()
 
-app = FastAPI(debug=True)
+middleware = [
+    Middleware(
+        CORSMiddleware,
+        allow_origins=['*'],
+        allow_credentials=True,
+        allow_methods=['*'],
+        allow_headers=['*']
+    )
+]
+
+app = FastAPI(debug=True, middleware=middleware)
 
 origins = [
     "http://localhost",
     "http://localhost:3000",
+    "http://0.0.0.0:3000",
+    "*"
 ]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     # CORSMiddleware,
+#     # allow_origins=origins,
+#     # allow_credentials=True,
+#     # allow_methods=["*"],
+#     # allow_headers=["*"],
+#     CORSMiddleware,
+#     allow_origins=["*"], # Allows all origins
+#     allow_credentials=True,
+#     allow_methods=["*"], # Allows all methods
+#     allow_headers=["*"], # Allows all headers
+# )
 
 @app.on_event("startup")
 async def startup_event():
@@ -98,6 +116,8 @@ async def deleteThrowSequence(throwSequenceId: str):
 async def getLabelOverview():
     throw_sequences = [json.loads(t) for t in repo.get_all()]
     label_overview = [ {'throwSequenceId': t['id'], 'creationDate': t['creationDate'], 'isFullyLabeled': is_fully_labeled(t)} for t in throw_sequences]
+
+    print("return overview", label_overview)
 
     return label_overview
 
