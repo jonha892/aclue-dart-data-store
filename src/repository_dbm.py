@@ -12,6 +12,9 @@ db = None
 
 def start():
     global db
+    if not DB_PATH.exists():
+        db = dbm.open(DB_PATH.as_posix(), "n")
+        db.close()
     db = dbm.open(DB_PATH.as_posix(), "w")
 
 def add_throw_sequence(throw_sequence: ThrowSequenceRequestModel):
