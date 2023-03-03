@@ -15,9 +15,12 @@ poetry
 poetry install
 
 ## Start
+
+```
 cd src
-poetry shell
+poetry shell oder source env/bin/activate
 uvicorn main:app --reload --host=0.0.0.0 --port=7777
+```
 
 ## Beispiel Requests
 
